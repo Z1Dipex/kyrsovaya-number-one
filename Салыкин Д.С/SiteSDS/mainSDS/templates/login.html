@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="{% static 'mainSDS/css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Авторизация</h1>
+        </div>
+        <div class="login-body">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn">Войти</button>
+            </form>
+            <div class="register-link">
+                Нет аккаунта? <a href="/">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

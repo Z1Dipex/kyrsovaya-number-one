@@ -1,0 +1,290 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <link rel="stylesheet" href="{% static 'mainSDS/css/profile.css' %}">
+    <link rel="icon" href="{% static 'mainSDS/text-document-outlined-symbol_icon-icons.com_57756.ico' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Профиль пользователя</h1>
+            <div class="user-info">
+                <span>Пользователь: <strong>{{ user.username }}</strong></span>
+                <a href="/logout/">Выйти</a>
+            </div>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Сообщение из сессии (для уведомлений о генерации) -->
+        {% if request.session.success_message %}
+            <ul class="messages">
+                <li class="success">{{ request.session.success_message }}</li>
+            </ul>
+            <!-- Удаляем сообщение из сессии после отображения -->
+            <script>
+                fetch('/profile/clear-message/', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } });
+            </script>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <fieldset>
+                <legend>Личная информация</legend>
+                
+                <div class="form-group">
+                    <label for="familia">Фамилия:</label>
+                    <input type="text" id="familia" name="familia" 
+                           value="{{ user_report.familia|default:'' }}" 
+                           placeholder="Введите фамилию">
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Имя:</label>
+                    <input type="text" id="name" name="name" 
+                           value="{{ user_report.name|default:'' }}" 
+                           placeholder="Введите имя">
+                </div>
+                
+                <div class="form-group">
+                    <label for="otchestvo">Отчество:</label>
+                    <input type="text" id="otchestvo" name="otchestvo" 
+                           value="{{ user_report.otchestvo|default:'' }}" 
+                           placeholder="Введите отчество">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Информация о практике</legend>
+                
+                <div class="form-group">
+                    <label for="tip">Тип практики:</label>
+                    <select id="tip" name="tip">
+                        <option value="">-- Не выбрано --</option>
+                        {% for type in prac_types %}
+                            <option value="{{ type.type_name }}" 
+                                {% if user_report.prac_type and user_report.prac_type.type_name == type.type_name %}selected{% endif %}>
+                                {{ type.type_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+    <label for="module">Профессиональный модуль:</label>
+    <select id="module" name="module">
+        <option value="">-- Не выбрано --</option>
+        {% for mod in modules %}
+            <option value="{{ mod.module_name }}" 
+                {% if user_report.module and user_report.module.id_module == mod.id_module %}selected{% endif %}>
+                {{ mod.module_name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+                <fieldset>
+    <legend>МДК (Междисциплинарные курсы)</legend>
+    
+    <div class="form-group">
+        <label for="mdk1">МДК 01.01:</label>
+        <input type="text" id="mdk1" name="mdk1" 
+               value="{{ user_report.mdk1|default:'' }}" 
+               placeholder="Разработка программных модулей">
+    </div>
+    
+    <div class="form-group">
+        <label for="mdk2">МДК 01.02:</label>
+        <input type="text" id="mdk2" name="mdk2" 
+               value="{{ user_report.mdk2|default:'' }}" 
+               placeholder="Поддержка и тестирование программных модулей">
+    </div>
+    
+    <div class="form-group">
+        <label for="mdk3">МДК 01.03:</label>
+        <input type="text" id="mdk3" name="mdk3" 
+               value="{{ user_report.mdk3|default:'' }}" 
+               placeholder="Разработка мобильных приложений">
+    </div>
+    
+    <div class="form-group">
+        <label for="mdk4">МДК 01.04:</label>
+        <input type="text" id="mdk4" name="mdk4" 
+               value="{{ user_report.mdk4|default:'' }}" 
+               placeholder="Системное программирование">
+    </div>
+</fieldset>
+
+<fieldset>
+    <legend>Объем практики</legend>
+    
+    <div class="form-group">
+        <label for="hours">Количество часов:</label>
+        <input type="number" id="hours" name="hours" 
+               value="{{ user_report.hours|default:'' }}" 
+               placeholder="36">
+    </div>
+</fieldset>
+                
+                <div class="form-group">
+    <label for="specialization">Специальность:</label>
+    <select id="specialization" name="specialization">
+        <option value="">-- Не выбрано --</option>
+        {% for spec in specializations %}
+            <option value="{{ spec.full_spec }}" 
+                {% if user_report.specialization and user_report.specialization.id_spec == spec.id_spec %}selected{% endif %}>
+                {{ spec.full_spec }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+                
+                <div class="form-group">
+                    <label for="kurs">Курс:</label>
+                    <input type="number" id="kurs" name="kurs" 
+                           value="{{ user_report.kurs|default:'' }}" 
+                           placeholder="Курс">
+                </div>
+                
+                <div class="form-group">
+    <label for="group">Группа:</label>
+    <select id="group" name="group">
+        <option value="">-- Не выбрано --</option>
+        {% for g in groups %}
+            <option value="{{ g.group_name }}" 
+                {% if user_report.group and user_report.group.id_group == g.id_group %}selected{% endif %}>
+                {{ g.group_name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Период практики</legend>
+                
+                <div class="form-group">
+                    <label for="begin_date">Дата начала:</label>
+                    <input type="date" id="begin_date" name="begin_date" 
+                        value="{{ begin_date_for_input }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="finish_date">Дата окончания:</label>
+                    <input type="date" id="finish_date" name="finish_date" 
+                        value="{{ finish_date_for_input }}">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Руководство практикой</legend>
+                
+                <div class="form-group">
+                    <label for="head1">Руководитель от техникума (ФИО):</label>
+                    <input type="text" id="head1" name="head1" 
+                           value="{{ user_report.head1|default:'' }}" 
+                           placeholder="ФИО руководителя от техникума">
+                </div>
+                
+                <div class="form-group">
+                    <label for="head2">Руководитель от техникума(2):</label>
+                    <input type="text" id="head2" name="head2" 
+                           value="{{ user_report.head2|default:'' }}" 
+                           placeholder="Должность">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ruc_pract">Руководитель от организации (ФИО):</label>
+                    <input type="text" id="ruc_pract" name="ruc_pract" 
+                           value="{{ user_report.ruc_pract|default:'' }}" 
+                           placeholder="ФИО руководителя от организации">
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Год:</label>
+                    <input type="number" id="year" name="year" 
+                           value="{{ user_report.year|default:'' }}" 
+                           placeholder="Год">
+                </div>
+            </fieldset>
+            
+            <div class="button-group">
+                <button type="submit" class="btn btn-save">Сохранить изменения</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <div class="generate-buttons">
+            <h3>Генерация документов</h3>
+            
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" name="generate_title" value="1" class="btn" {% if not has_title_template %}disabled{% endif %}>
+                    Сгенерировать титульный лист
+                </button>
+            </form>
+            
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" name="generate_diary" value="1" class="btn" {% if not has_diary_template %}disabled{% endif %}>
+                    Сгенерировать дневник
+                </button>
+            </form>
+            
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" name="generate_task" value="1" class="btn" {% if not has_task_template %}disabled{% endif %}>
+                    Сгенерировать задание
+                </button>
+            </form>
+            
+            {% if not has_title_template or not has_diary_template or not has_task_template %}
+                <div class="warning">
+                    <strong>Внимание!</strong> Некоторые шаблоны не загружены.<br>
+                    {% if user.is_staff %}
+                        Загрузите шаблоны в <a href="/admin/mainSDS/doctemplate/add/">админ-панели</a>:
+                        <ul style="margin-top: 8px; margin-left: 20px;">
+                            {% if not has_title_template %}<li>Титульный лист (template_type = 'title')</li>{% endif %}
+                            {% if not has_diary_template %}<li>Дневник отчета (template_type = 'diary')</li>{% endif %}
+                            {% if not has_task_template %}<li>Задание на практику (template_type = 'task')</li>{% endif %}
+                        </ul>
+                    {% else %}
+                        Обратитесь к администратору для загрузки шаблонов.
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <hr>
+        <div class="note">
+            Заполните данные о практике, затем нажмите кнопку для генерации нужного документа. Файл скачается автоматически.
+        </div>
+    </div>
+
+    <script>
+        // Автоматическое скрытие сообщений через 5 секунд
+        setTimeout(function() {
+            var messages = document.querySelectorAll('.messages li');
+            messages.forEach(function(message) {
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.5s ease';
+                setTimeout(function() {
+                    message.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
